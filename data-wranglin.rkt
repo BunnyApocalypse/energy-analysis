@@ -75,7 +75,7 @@
                      (cdr tbl-remaining)
                      null
                      (reverse (car tbl-remaining)))]
-            [(and #t (string->number (car lst-remaining)))
+            [(string->number (car lst-remaining))
              (kernel clean-tbl
                      tbl-remaining
                      (cons (car lst-remaining) clean-lst)
