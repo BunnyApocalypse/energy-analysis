@@ -21,10 +21,8 @@
 (define reformat-energy-data
   (lambda (table)
     (let* ([my-> (lambda (lst1 lst2)
-                   (if (string-ci>? (cadr lst1)
-                                    (cadr lst2))
-                       #t
-                       #f))]
+                   (string-ci>? (cadr lst1)
+                                (cadr lst2)))]
            [my-table (sort (cdr table) my->)]
            [list-o-categories (reverse (append (map car (tally-all (map (section list-ref <> 4) my-table))) (list "Month" "Year")))]
            [number-o-categories (length (cddr list-o-categories))]
