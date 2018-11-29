@@ -1,10 +1,10 @@
 #lang racket
 (require csc151)
 (define energy-production-data
-  (read-csv-file "/Users/BigO/Desktop/College/Classes/Semester 5 Fall 2018/Csc 151/Project/MER_T01_02.csv"))
+  (read-csv-file "MER_T01_02.csv"))
 
 (define energy-consumption-data
-  (read-csv-file "/Users/BigO/Desktop/College/Classes/Semester 5 Fall 2018/Csc 151/Project/MER_T01_03.csv"))
+  (read-csv-file "MER_T01_03.csv"))
              
 ;;; Procedure:
 ;;;   reformat-energy-data
@@ -33,7 +33,7 @@
                    [counter number-o-categories])
         (cond [(null? tbl-remaining)
                (cons list-o-categories tbl-so-far)]
-              [(= 0 (decrement counter))
+              [(= 1 counter)
                (kernel
                 (cons (append (get-month-and-year tbl-remaining) (cons (caddar tbl-remaining) current-row)) tbl-so-far)
                 (cdr tbl-remaining)
