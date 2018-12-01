@@ -45,6 +45,11 @@
                        (cons (caddar tbl-remaining) current-row)
                        (decrement counter))])))))
 
+(define reformatted-energy-production-data
+  (reformat-energy-data energy-production-data))
+(define reformatted-energy-consumption-data
+  (reformat-energy-data energy-consumption-data))
+
 ;;; Procedure:
 ;;;
 ;;; Parameters:
@@ -80,6 +85,11 @@
                       (cdr tbl-remaining)
                       null
                       (reverse (car tbl-remaining)))]))))
+
+(define cleaned-reformatted-energy-production-data
+  (clean-reformatted-energy-data reformatted-energy-production-data))
+(define cleaned-reformatted-energy-consumption-data
+  (clean-reformatted-energy-data reformatted-energy-consumption-data))
 
 (define consolidate-gas-production
   (lambda (production-table)
@@ -120,7 +130,7 @@
 
 ;FIXME wasted work in working-row definitions
 (define create-ratio-table
-  (lambda (usage-table production-table)
+  (lambda (consumption-table production-table)
     (let kernel ([new-table null]
                  [tbl1 (reverse (cdr usage-table))]
                  [tbl2 (reverse (cdr production-table))]
