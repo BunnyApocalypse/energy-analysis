@@ -80,6 +80,44 @@
                       (cdr tbl-remaining)
                       null
                       (reverse (car tbl-remaining)))]))))
+
+(define consolidate-gas-production
+  (lambda (production-table)
+    (let ([my-production-table (reverse (cons (list 1) (cdr production-table)))])
+    (let kernel ([new-table null]
+                 [tbl-remaining my-production-table]
+                 [new-list null]
+                 [current-list (reverse (car my-production-table))]
+                 [counter 0])
+      (cond [(null? tbl-remaining)
+             (cons (append (take (car production-table) 11)
+                           (list "Crude Oil Production" "Combined (Dry & Liquid) Natural Gas Production" "Coal Production"))
+                   new-table)]
+            [(null? current-list)
+             (kernel (cons new-list new-table)
+                     (cdr tbl-remaining)
+                     null
+                     (reverse (car tbl-remaining))
+                     0)]
+            [(= 1 counter)
+             (kernel new-table
+                     tbl-remaining
+                     (cons (+ (car current-list) (caddr current-list)) new-list)
+                     (cdr current-list)
+                     2)]
+            [(= 3 counter)
+             (kernel new-table
+                     tbl-remaining
+                     new-list
+                     (cdr current-list)
+                     4)]
+            [else
+             (kernel new-table
+                     tbl-remaining
+                     (cons (car current-list) new-list)
+                     (cdr current-list)
+                     (increment counter))])))))
+
 ;FIXME wasted work in working-row definitions
 (define create-ratio-table
   (lambda (usage-table production-table)
@@ -92,7 +130,7 @@
                  [row null])
       (cond
         [(or (null? tbl1) (null? tbl2))
-            new-table]
+            (cons (car production-table) new-table)]
         [(and (or (= 1 (length tbl1)) (= 1 (length tbl2))) (= counter 13))
          (kernel
           (cons (reverse row) new-table)
@@ -133,47 +171,14 @@
                     (/ (car working-row-1) (car working-row-2))) row))]))))
 
 (define reformatted-production-data
-  (clean-reformatted-energy-data (reformat-energy-data energy-production-data)))
+  (consolidate-gas-production (clean-reformatted-energy-data (reformat-energy-data energy-production-data))))
+
 (define reformatted-consumption-data
   (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data)))
-(define test (create-ratio-table reformatted-consumption-data reformatted-production-data))
+
+(define popularity-ratio-tbl (create-ratio-table reformatted-consumption-data reformatted-production-data))
 
 
-(define consolidate-gas-production
-  (lambda (production-table)
-    (let ([my-production-table (reverse (cdr production-table))])
-    (let kernel ([new-table null]
-                 [tbl-remaining my-production-table]
-                 [new-list null]
-                 [current-list (reverse (car my-production-table))]
-                 [counter 0])
-      (cond [(null? tbl-remaining)
-             (cons (append (take (car production-table) 11)
-                           (list "Crude Oil Production" "Combined (Dry & Liquid) Natural Gas Production" "Coal Production"))
-                   new-table)]
-            [(null? current-list)
-             (kernel (cons new-list new-table)
-                     (cdr tbl-remaining)
-                     null
-                     (reverse (car tbl-remaining))
-                     0)]
-            [(= 1 counter)
-             (kernel new-table
-                     tbl-remaining
-                     (cons (+ (car current-list) (caddr current-list)) new-list)
-                     (cdr current-list)
-                     2)]
-            [(= 3 counter)
-             (kernel new-table
-                     tbl-remaining
-                     new-list
-                     (cdr current-list)
-                     4)]
-            [else
-             (kernel new-table
-                     tbl-remaining
-                     (cons (car current-list) new-list)
-                     (cdr current-list)
-                     (increment counter))])))))
+
 
 
