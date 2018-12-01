@@ -45,11 +45,6 @@
                        (cons (caddar tbl-remaining) current-row)
                        (decrement counter))])))))
 
-(define reformatted-production-data
-  (reformat-energy-data energy-production-data))
-(define reformatted-consumption-data
-  (reformat-energy-data energy-consumption-data))
-
 ;;; Procedure:
 ;;;
 ;;; Parameters:
@@ -85,3 +80,9 @@
                      (cdr tbl-remaining)
                      null
                      (reverse (car tbl-remaining)))]))))
+
+(define reformatted-production-data
+  (clean reformatted-energy-data (reformat-energy-data energy-production-data)))
+(define reformatted-consumption-data
+  (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data)))
+
