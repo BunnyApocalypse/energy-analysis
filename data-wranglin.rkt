@@ -91,8 +91,17 @@
                  [counter 0]
                  [row null])
       (cond
-        [(or (= 1 (length tbl1)) (= 1 (length tbl2)))
-         new-table]
+        [(or (null? tbl1) (null? tbl2))
+            new-table]
+        [(and (or (= 1 (length tbl1)) (= 1 (length tbl2))) (= counter 13))
+         (kernel
+          (cons (reverse row) new-table)
+          (cdr tbl1)
+          (cdr tbl2)
+          (car tbl1)
+          (car tbl2)
+          0
+          null)]
         [(= counter 13)
          (kernel
           (cons (reverse row) new-table)
@@ -128,3 +137,4 @@
 (define reformatted-consumption-data
   (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data)))
 (define test (create-ratio-table reformatted-consumption-data reformatted-production-data))
+
