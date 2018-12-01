@@ -73,7 +73,7 @@
              [(string->number (car lst-remaining))
               (kernel clean-tbl
                       tbl-remaining
-                      (cons (car lst-remaining) clean-lst)
+                      (cons (string->number (car lst-remaining)) clean-lst)
                       (cdr lst-remaining))]
              [else
               (kernel clean-tbl
@@ -128,9 +128,9 @@
           (cdr working-row-1)
           (cdr working-row-2)
           (+ counter 1)
-          (cons (if (equal? "0" (car working-row-2))
+          (cons (if (= 0 (car working-row-2))
                     "Production was 0"
-                    (/ (string->number (car working-row-1)) (string->number (car working-row-2)))) row))]))))
+                    (/ (car working-row-1) (car working-row-2))) row))]))))
 
 (define reformatted-production-data
   (clean-reformatted-energy-data (reformat-energy-data energy-production-data)))
@@ -141,7 +141,7 @@
 
 (define consolidate-gas-production
   (lambda (production-table)
-    (let ([my-production-table (reverse (cons (cdr production-table)))])
+    (let ([my-production-table (reverse (cdr production-table))])
     (let kernel ([new-table null]
                  [tbl-remaining my-production-table]
                  [new-list null]
