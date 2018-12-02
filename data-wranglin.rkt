@@ -75,7 +75,7 @@
                       (cdr tbl-remaining)
                       null
                       (reverse (car tbl-remaining)))]
-             [(string->number (car lst-remaining))
+             [(< 0 (or (string->number (car lst-remaining)) -1))
               (kernel clean-tbl
                       tbl-remaining
                       (cons (string->number (car lst-remaining)) clean-lst)
@@ -134,55 +134,8 @@
                        (cdr current-list)
                        (increment counter))])))))
 
-;FIXME wasted work in working-row definitions
-(define create-ratio-table
-  (lambda (consumption-table production-table)
-    (let kernel ([new-table null]
-                 [consumption-tbl-remaining (reverse (cdr consumption-table))]
-                 [production-tbl-remaining (reverse (cdr production-table))]
-                 [consumption-working-row (car (reverse (cdr consumption-table)))]
-                 [production-working-row (car (reverse (cdr production-table)))]
-                 [counter 0]
-                 [row null])
-      (cond
-        [(or (null? consumption-tbl-remaining) (null? production-tbl-remaining))
-         (cons (car production-table) new-table)]
-        [(and (or (= 1 (length consumption-tbl-remaining)) (= 1 (length production-tbl-remaining))) (= counter 13))
-         (kernel (cons (reverse row) new-table)
-                 (cdr consumption-tbl-remaining)
-                 (cdr production-tbl-remaining)
-                 (car consumption-tbl-remaining)
-                 (car production-tbl-remaining)
-                 0
-                 null)]
-        [(= counter 13)
-         (kernel (cons (reverse row) new-table)
-                 (cdr consumption-tbl-remaining)
-                 (cdr production-tbl-remaining)
-                 (car (cdr consumption-tbl-remaining))
-                 (car (cdr production-tbl-remaining))
-                 0
-                 null)]
-        [(= counter 0)
-         (kernel new-table
-                 consumption-tbl-remaining
-                 production-tbl-remaining
-                 (cddr consumption-working-row)
-                 (cddr production-working-row)
-                 (+ counter 1)
-                 (cons (cadr consumption-working-row) (cons (car consumption-working-row) row)))]
-        [else
-         (kernel new-table
-                 consumption-tbl-remaining
-                 production-tbl-remaining
-                 (cdr consumption-working-row)
-                 (cdr production-working-row)
-                 (+ counter 1)
-                 (cons (if (= 0 (car production-working-row))
-                           "Production was 0"
-                           (/ (car consumption-working-row) (car production-working-row))) row))]))))
 
-(define new-create-popularity-ratio-table
+(define create-popularity-ratio-table
   (lambda (consumption-table production-table)
     (let ([my-consumption-table (reverse (cons (list 1) (cdr consumption-table)))]
           [my-production-table (reverse (cons (list 1) (cdr production-table)))]
@@ -219,23 +172,21 @@
                        (cdr consumption-working-row)
                        (cdr production-working-row)
                        (increment counter)
-                       (cons (cond [(and (= 0 (car consumption-working-row)) (= 0 (car production-working-row)))
-                                    1]
-                                   [(or (= 0 (car consumption-working-row)) (= 0 (car production-working-row)))
-                                    (if (= 0 (car consumption-working-row))
-                                        "No Consumption"
-                                        "No Production")]
-                                   [else
-                                    (round-to-sig-figs (/ (car consumption-working-row) (car production-working-row)) 6)]) new-row))])))))
+                       (cons (round-to-sig-figs (/ (car consumption-working-row)
+                                                   (car production-working-row)) 6)
+                             new-row))])))))
+
+
 
 (define reformatted-production-data
-  (consolidate-gas-production cleaned-reformatted-energy-production-data))
+  ;(consolidate-gas-production
+   cleaned-reformatted-energy-production-data)
 
 (define reformatted-consumption-data
   cleaned-reformatted-energy-consumption-data)
 
 (define popularity-ratio-tbl
-  (create-ratio-table reformatted-consumption-data reformatted-production-data))
+  (create-popularity-ratio-table reformatted-consumption-data reformatted-production-data))
 
 ;you can use these procedures to test the results of our popularity ratio table
 (define cons-tst-lst
@@ -251,3 +202,10 @@
     (map / (cddr lst1) (cddr lst2))))
 
 
+
+#|
+  (1984 1 1.3058098631470068 1.0 1.0 "Production was 0" 1.0 1.0 1.0 1.0 1.3582287005335538 1.7618493607754988 1.270653675804298 1.0378518129550782)
+  (1984 2 1.180052608387967 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.2099185299227448 1.6141025048386415 1.2084325491890666 0.8381185795419854)
+  (1984 3 1.1556963819864743 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.180717528551824 1.725146997706528 1.1034521271432531 0.7818139766878721)
+  (1984 4 1.1115358993384157 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.1286594869929656 1.6377808098009283 0.9798682861424403 0.7941446848266912))
+|#
