@@ -7,9 +7,6 @@
 ;1; DOCUMENT ALL PROCEDURES 
 ;;;
 ;2; ADD JANUARY AND JULY TICK MARKS TO GRAPHS 
-;;;
-;3; MAKE GRAPHS LOG SCALE
-;;;
 
 (define energy-production-data
   (read-csv-file "MER_T01_02.csv"))
@@ -212,8 +209,8 @@
 
 
 (define reformatted-production-data
-  ;(consolidate-gas-production
-  cleaned-reformatted-energy-production-data)
+  (consolidate-gas-production
+  cleaned-reformatted-energy-production-data))
 
 (define reformatted-consumption-data
   cleaned-reformatted-energy-consumption-data)
@@ -292,7 +289,7 @@
               [else
                (kernel new-table
                        table-remaining
-                       (cons (cons current-time-value (cons (car current-list) null)) new-list)
+                       (cons (cons current-time-value (cons (/ (log (car current-list)) (log 10)) null)) new-list)
                        (cdr current-list)
                        current-time-value
                        time-values-remaining)])))))
@@ -332,89 +329,53 @@
   (get-data total-less-popularity-ratio-data-points 11))
 
 
-
-
-
 (define carbon-energy-plot
   (plot (list
-         (function (lambda (x) 1) #:color "purple" #:style 'dot #:width 0.75)
+         (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
          (lines (cdr biomass-energy-popularity-ratio-data)  #:color "darkgreen" #:style 'long-dash #:label (cadar biomass-energy-popularity-ratio-data))
-         ;(points (cdr biomass-energy-popularity-ratio-data) #:fill-color 2 #:sym 'fullcircle1)
          (lines (cdr total-fossil-fuels-popularity-ratio-data)  #:color "slategray" #:style 'dot-dash #:label (cadar total-fossil-fuels-popularity-ratio-data))
-         ;(points (cdr total-fossil-fuels-popularity-ratio-data) #:fill-color 8 #:sym 'fullcircle1)
          (lines (cdr petroleum-to-crude-oil-popularity-ratio-data)  #:color "black" #:style 'short-dash #:label (cadar petroleum-to-crude-oil-popularity-ratio-data))
-         ;(points (cdr petroleum-to-crude-oil-popularity-ratio-data) #:fill-color 9 #:sym 'fullcircle1)
          (lines (cdr combined-natural-gas-popularity-ratio-data) #:color "blue" #:style 'long-dash  #:label (cadar combined-natural-gas-popularity-ratio-data))
-         ;(points (cdr combined-natural-gas-popularity-ratio-data) #:fill-color 10 #:sym 'fullcircle1)
-         (lines (cdr coal-popularity-ratio-data) #:color "brown" #:style 'dot #:label (cadar coal-popularity-ratio-data))
-         ;(points (cdr coal-popularity-ratio-data) #:fill-color 11 #:sym 'fullcircle1)
-         )
+         (lines (cdr coal-popularity-ratio-data) #:color "brown" #:style 'dot #:label (cadar coal-popularity-ratio-data)))
         #:title "Popularity Ratios over Time for Carbon Sources of Energy"
-        #:x-label "Time (Months from January 1984)"
-        #:y-label "Ratio"
+        #:x-label "Time (Months from January 1984 to August 2018)"
+        #:y-label "Ratio (log base 10)"
         #:x-min 0
         #:x-max 420
-        #:y-min 0
-        #:y-max 100;0000
+        #:y-min -0.5
+        #:y-max 6
         #:width 1000
         #:height 1000))
 
 (define renewable-energy-plot
   (plot (list
-         (function (lambda (x) 1) #:color "purple" #:style 'dot #:width 0.75)
+         (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
          (lines (cdr total-renewable-energy-popularity-ratio-data)  #:color "darkgreen" #:style 'dot-dash #:width 1.3 #:label (cadar total-renewable-energy-popularity-ratio-data))
-         ;(points (cdr total-renewable-energy-popularity-ratio-data) #:fill-color "darkgreen" #:sym 'fullcircle1)
          (lines (cdr wind-energy-popularity-ratio-data)  #:color "slategray" #:style 'dot #:width 1.3 #:label (cadar wind-energy-popularity-ratio-data))
-         ;(points (cdr wind-energy-popularity-ratio-data) #:fill-color "slategray" #:sym 'fullcircle1)
          (lines (cdr solar-energy-popularity-ratio-data)  #:color "darkorange" #:style 'long-dash #:width 1.3 #:label (cadar solar-energy-popularity-ratio-data))
-         ;(points (cdr solar-energy-popularity-ratio-data) #:fill-color "darkorange" #:sym 'fullcircle1)
          (lines (cdr geothermal-energy-popularity-ratio-data)  #:color "brown" #:style 'short-dash #:width 1.3 #:label (cadar geothermal-energy-popularity-ratio-data))
-         ;(points (cdr geothermal-energy-popularity-ratio-data) #:fill-color "brown" #:sym 'fullcircle1)
          (lines (cdr hydroelectric-power-popularity-ratio-data)  #:color "darkblue" #:style 'dot #:width 1.3 #:label (cadar hydroelectric-power-popularity-ratio-data))
-         ;(points (cdr hydroelectric-power-popularity-ratio-data) #:fill-color "darkblue" #:sym 'fullcircle1)
-         (lines (cdr nuclear-electric-power-popularity-ratio-data)  #:color "red" #:style 'solid #:width 1.3 #:label (cadar nuclear-electric-power-popularity-ratio-data))
-         ;(points (cdr nuclear-electric-power-popularity-ratio-data) #:fill-color "red" #:sym 'fullcircle1)
-         )
-        #:title "Popularity Ratios over Time for Renewable Sources of Energy"
-        #:x-label "Time (Months from January 1984)"
-        #:y-label "Ratio"
+         (lines (cdr nuclear-electric-power-popularity-ratio-data)  #:color "red" #:style 'solid #:width 1.3 #:label (cadar nuclear-electric-power-popularity-ratio-data)))
+        #:title "Popularity Ratios over Time for Non-Carbon Based Sources of Energy"
+        #:x-label "Time (Months from January 1984 to August 2018)"
+        #:y-label "Ratio (log base 10)"
         #:x-min 0
         #:x-max 420
-        #:y-min 0
-        #:y-max 20
+        #:y-min -4
+        #:y-max 2.25
         #:width 1000
         #:height 1000))
 
 (define total-primary-energy-plot
   (plot (list
-         (function (lambda (x) 1) #:color "purple" #:style 'dot #:width 0.75)
-         (lines (cdr total-primary-energy-popularity-ratio-data) #:color 0 #:style 'solid #:label (cadar total-primary-energy-popularity-ratio-data))
-         ;(points (cdr total-primary-energy-popularity-ratio-data) #:fill-color 0  #:sym 'fullcircle1)
-         )
+         (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
+         (lines (cdr total-primary-energy-popularity-ratio-data) #:color 0 #:style 'solid #:label (cadar total-primary-energy-popularity-ratio-data)))
         #:title "Popularity Ratio over Time for Total Primary Energy"
-        #:x-label "Time (Months from January 1984)"
-        #:y-label "Ratio"
+        #:x-label "Time (Months from January 1984 to August 2018)"
+        #:y-label "Ratio (log base 10)"
         #:x-min 0
         #:x-max 420
-        #:y-min 0
-        #:y-max 50
+        #:y-min 0.7
+        #:y-max 1.5
         #:width 1000
         #:height 1000))
-
-
-
-;you can use these procedures to test the results of our popularity ratio table
-(define cons-tst-lst
-  (lambda (num max)
-    (list-ref (take (cdr reformatted-consumption-data) max) num)))
-
-(define prod-tst-lst
-  (lambda (num max)
-    (list-ref (take (cdr reformatted-production-data) max) num)))
-
-(define list-divide
-  (lambda (lst1 lst2)
-    (map / (cddr lst1) (cddr lst2))))
-
-
-
