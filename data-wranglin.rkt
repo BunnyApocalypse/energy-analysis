@@ -1,41 +1,30 @@
 #lang racket
 (require csc151)
-
-;;; Here, we read our csv files containing our data, downloaded from the eia:
-;;;    https://www.eia.gov/totalenergy/data/annual/
-;;;    In "Annual Energy Review", under "Energy Overview", sections 1.2 and 1.3,
-;;;    you will find the following datasets: Primary energy production by source
-;;;                                          Primary energy consumption by source
+(require plot)
+;;;
+;;;TO DO
+;;;
+;1; DOCUMENT ALL PROCEDURES 
+;;;
+;2; ADD JANUARY AND JULY TICK MARKS TO GRAPHS 
+;;;
+;3; MAKE GRAPHS LOG SCALE
+;;;
 
 (define energy-production-data
   (read-csv-file "MER_T01_02.csv"))
 
 (define energy-consumption-data
   (read-csv-file "MER_T01_03.csv"))
-;=======================================================================================================================
+
 ;;; Procedure:
 ;;;   reformat-energy-data
 ;;; Parameters:
-;;;   table, a list of lists
+;;;   table, a table in
 ;;; Purpose:
-;;;   to reformat table such that we have the following columns:
-;;;    '("Year"
-;;;      "Month"
-;;;      "Total Primary Energy Production"
-;;;      "Total Renewable Energy Production"
-;;;      "Biomass Energy Production"
-;;;      "Wind Energy Production"
-;;;      "Solar Energy Production"
-;;;      "Geothermal Energy Production"
-;;;      "Hydroelectric Power Production"
-;;;      "Nuclear Electric Power Production"
-;;;      "Total Fossil Fuels Production"
-;;;      "Natural Gas Plant Liquids Production"
-;;;      "Crude Oil Production"
-;;;      "Natural Gas (Dry) Production"
-;;;      "Coal Production") 
+;;;
 ;;; Produces:
-;;;    reformatted-table, a list of lists
+;;;
 ;;; Preconditions:
 ;;;
 ;;; Postconditions:
@@ -66,22 +55,20 @@
                        (cdr tbl-remaining)
                        (cons (caddar tbl-remaining) current-row)
                        (decrement counter))])))))
-;=======================================================================================================================
-;;; Here we define our reformatted tables that contain non-useful rows such as "Not Available"
+
 (define reformatted-energy-production-data
   (reformat-energy-data energy-production-data))
-
 (define reformatted-energy-consumption-data
   (reformat-energy-data energy-consumption-data))
-;=======================================================================================================================
+
 ;;; Procedure:
 ;;;   clean-reformatted-energy-data
 ;;; Parameters:
-;;;   table, a list of lists
+;;;
 ;;; Purpose:
-;;;   to remove all rows where "Not Available", "0" or negative values appear. 
+;;;
 ;;; Produces:
-;;;   clean-reformatted-table, a list of lists
+;;;
 ;;; Preconditions:
 ;;;
 ;;; Postconditions:
@@ -109,40 +96,22 @@
                       (cdr tbl-remaining)
                       null
                       (reverse (car tbl-remaining)))]))))
-;=======================================================================================================================
-;;; Here we define our clean-reformatted tables that eliminate worrisome rows.
+
 (define cleaned-reformatted-energy-production-data
   (clean-reformatted-energy-data reformatted-energy-production-data))
-
 (define cleaned-reformatted-energy-consumption-data
   (clean-reformatted-energy-data reformatted-energy-consumption-data))
-;=======================================================================================================================
-;;; Procedure:
-;;;   round-to-sig-figs
-;;; Parameters:
-;;;   num
-;;;   figs
-;;; Purpose:
-;;;   
-;;; Produces:
-;;;   
-;;; Preconditions:
-;;;
-;;; Postconditions:
-;;;
-(define round-to-sig-figs
-  (lambda (num figs)
-    (let ([fig-factor (reduce * (make-list figs 10))])
-      (/ (round (* num fig-factor)) fig-factor))))
+
+
 
 ;;; Procedure:
-;;;   consolidate-gas-production
+;;;    consolidate-gas-production
 ;;; Parameters:
-;;;   production-table, a list of lists
+;;;
 ;;; Purpose:
-;;;    
+;;;
 ;;; Produces:
-;;;   
+;;;
 ;;; Preconditions:
 ;;;
 ;;; Postconditions:
@@ -168,7 +137,7 @@
               [(= 1 counter)
                (kernel new-table
                        tbl-remaining
-                       (cons (round-to-sig-figs (+ (car current-list) (caddr current-list)) 6) new-list)
+                       (cons (+ (car current-list) (caddr current-list)) new-list)
                        (cdr current-list)
                        2)]
               [(= 3 counter)
@@ -183,23 +152,25 @@
                        (cons (car current-list) new-list)
                        (cdr current-list)
                        (increment counter))])))))
-;=======================================================================================================================
+
 ;;; Procedure:
 ;;;   create-popularity-ratio-table
 ;;; Parameters:
-;;;   consumption-table
-;;;   production-table
+;;;
 ;;; Purpose:
-;;;   
+;;;
 ;;; Produces:
-;;;   
+;;;
 ;;; Preconditions:
 ;;;
 ;;; Postconditions:
 ;;;
 (define create-popularity-ratio-table
   (lambda (consumption-table production-table)
-    (let ([my-consumption-table (reverse (cons (list 1) (cdr consumption-table)))]
+    (let ([round-to-sig-figs (lambda (num figs)
+                               (let ([fig-factor (reduce * (make-list figs 10))])
+                                 (/ (round (* num fig-factor)) fig-factor)))]
+          [my-consumption-table (reverse (cons (list 1) (cdr consumption-table)))]
           [my-production-table (reverse (cons (list 1) (cdr production-table)))]
           [new-header (list "Year" "Month" "Total Primary Energy Popularity Ratio"
                             "Total Renewable Energy Popularity Ratio" "Biomass Energy Popularity Ratio"
@@ -237,34 +208,19 @@
                        (cons (round-to-sig-figs (/ (car consumption-working-row)
                                                    (car production-working-row)) 6)
                              new-row))])))))
-;=======================================================================================================================
-;;; Here we define our final production table that consolidates the different gas productions
+
+
+
 (define reformatted-production-data
-  (consolidate-gas-production
-   cleaned-reformatted-energy-production-data))
+  ;(consolidate-gas-production
+  cleaned-reformatted-energy-production-data)
 
-;;; Here we define our final consumption table
 (define reformatted-consumption-data
-   cleaned-reformatted-energy-consumption-data)
+  cleaned-reformatted-energy-consumption-data)
 
-;;; Here we define our popularity ratio table for each source
-(define popularity-ratio-tbl
+(define popularity-ratio-table
   (create-popularity-ratio-table reformatted-consumption-data reformatted-production-data))
-;=======================================================================================================================
-;You can use these procedures to test the results of our popularity ratio table.
 
-(define cons-tst-lst
-  (lambda (num max)
-   (list-ref (take (cdr reformatted-consumption-data) max) num)))
-
-(define prod-tst-lst
-  (lambda (num max)
-   (list-ref (take (cdr reformatted-production-data) max) num)))
-
-(define list-divide
-  (lambda (lst1 lst2)
-    (map / (cddr lst1) (cddr lst2))))
-;========================================================================================================================
 ;;; Procedure:
 ;;;   remove-annual-totals
 ;;; Parameters:
@@ -285,6 +241,8 @@
 
 (define total-less-popularity-ratio-table
   (cons (car popularity-ratio-table) (filter (section remove-annual-totals <>) (cdr popularity-ratio-table))))
+
+
 
 ;;; Procedure:
 ;;;   make-popularity-ratio-data-points
@@ -315,7 +273,7 @@
                                                    (cons (+ first-digit (* 12 (- second-digit 1984))) metric))]))))]
            [time-values (reverse (cons 0 (time-scale-metric table)))]
            [my-table (reverse (cons (make-list 11 0) (map cddr (cdr table))))]
-           [headers (map (o (section list "Timestep" <>) (section string-replace <>  " Popularity Ratio " "")) (cddar table))])
+           [headers (map (o (section list "Timestep" <>) (section string-replace <>  " Popularity Ratio" "")) (cddar table))])
       (let kernel ([new-table null]
                    [table-remaining (cdr my-table)]
                    [new-list null]
@@ -343,18 +301,7 @@
 (define total-less-popularity-ratio-data-points
   (make-popularity-ratio-data-points total-less-popularity-ratio-table))
 
-;;; Procedure:
-;;;   get-data
-;;; Parameters:
-;;;
-;;; Purpose:
-;;;
-;;; Produces:
-;;;
-;;; Preconditions:
-;;;
-;;; Postconditions:
-;;;
+
 (define get-data
   (lambda (table num)
     (map (section list-ref <> num) table)))
@@ -383,6 +330,10 @@
   (get-data total-less-popularity-ratio-data-points 10))
 (define coal-popularity-ratio-data
   (get-data total-less-popularity-ratio-data-points 11))
+
+
+
+
 
 (define carbon-energy-plot
   (plot (list
@@ -449,6 +400,21 @@
         #:y-max 50
         #:width 1000
         #:height 1000))
+
+
+
+;you can use these procedures to test the results of our popularity ratio table
+(define cons-tst-lst
+  (lambda (num max)
+    (list-ref (take (cdr reformatted-consumption-data) max) num)))
+
+(define prod-tst-lst
+  (lambda (num max)
+    (list-ref (take (cdr reformatted-production-data) max) num)))
+
+(define list-divide
+  (lambda (lst1 lst2)
+    (map / (cddr lst1) (cddr lst2))))
 
 
 
