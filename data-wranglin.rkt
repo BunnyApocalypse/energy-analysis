@@ -1,12 +1,7 @@
 #lang racket
 (require csc151)
 (require plot)
-;;;
-;;;TO DO
-;;;
-;1; DOCUMENT ALL PROCEDURES 
-;;;
-;2; ADD JANUARY AND JULY TICK MARKS TO GRAPHS 
+
 
 (define energy-production-data
   (read-csv-file "MER_T01_02.csv"))
@@ -253,7 +248,7 @@
 ;;;
 ;;; Postconditions:
 ;;;
-(define make-popularity-ratio-data-points
+(define make-popularity-ratio-data-points-log
   (lambda (table)
     (let* ([time-scale-metric (lambda (table)
                                 (let ([my-table (reverse (cons (list 0 0) (cdr table)))])
@@ -294,9 +289,66 @@
                        current-time-value
                        time-values-remaining)])))))
 
+;;; Procedure:
+;;;   make-popularity-ratio-data-points
+;;; Parameters:
+;;;
+;;; Purpose:
+;;;
+;;; Produces:
+;;;
+;;; Preconditions:
+;;;
+;;; Postconditions:
+;;;
+(define make-popularity-ratio-data-points
+  (lambda (table)
+    (let* ([time-scale-metric (lambda (table)
+                                (let ([my-table (reverse (cons (list 0 0) (cdr table)))])
+                                  (let kernel ([table-remaining (cdr my-table)]
+                                               [first-digit (cadar my-table)]
+                                               [second-digit (caar my-table)]
+                                               [metric null])
+                                    (cond [(null? table-remaining)
+                                           metric]
+                                          [else
+                                           (kernel (cdr table-remaining)
+                                                   (cadar table-remaining)
+                                                   (caar table-remaining)
+                                                   (cons (+ first-digit (* 12 (- second-digit 1984))) metric))]))))]
+           [time-values (reverse (cons 0 (time-scale-metric table)))]
+           [my-table (reverse (cons (make-list 11 0) (map cddr (cdr table))))]
+           [headers (map (o (section list "Timestep" <>) (section string-replace <>  " Popularity Ratio" "")) (cddar table))])
+      (let kernel ([new-table null]
+                   [table-remaining (cdr my-table)]
+                   [new-list null]
+                   [current-list (reverse (car my-table))]
+                   [current-time-value (car time-values)]
+                   [time-values-remaining (cdr time-values)])
+        (cond [(null? table-remaining)
+               (cons headers new-table)]
+              [(null? current-list)
+               (kernel (cons new-list new-table)
+                       (cdr table-remaining)
+                       null
+                       (reverse (car table-remaining))
+                       (car time-values-remaining)
+                       (cdr time-values-remaining))]
+              [else
+               (kernel new-table
+                       table-remaining
+                       (cons (cons current-time-value (cons (car current-list) null)) new-list)
+                       (cdr current-list)
+                       current-time-value
+                       time-values-remaining)])))))
+
+
 
 (define total-less-popularity-ratio-data-points
   (make-popularity-ratio-data-points total-less-popularity-ratio-table))
+
+(define total-less-popularity-ratio-data-points-log
+  (make-popularity-ratio-data-points-log total-less-popularity-ratio-table))
 
 
 (define get-data
@@ -307,6 +359,8 @@
   (get-data total-less-popularity-ratio-data-points 0))
 (define total-renewable-energy-popularity-ratio-data
   (get-data total-less-popularity-ratio-data-points 1))
+(define total-renewable-energy-popularity-ratio-data-log
+  (get-data total-less-popularity-ratio-data-points-log 1))
 (define biomass-energy-popularity-ratio-data
   (get-data total-less-popularity-ratio-data-points 2))
 (define wind-energy-popularity-ratio-data
@@ -320,19 +374,19 @@
 (define nuclear-electric-power-popularity-ratio-data
   (get-data total-less-popularity-ratio-data-points 7))
 (define total-fossil-fuels-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 8))
+  (get-data total-less-popularity-ratio-data-points-log 8))
 (define petroleum-to-crude-oil-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 9))
+  (get-data total-less-popularity-ratio-data-points-log 9))
 (define combined-natural-gas-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 10))
+  (get-data total-less-popularity-ratio-data-points-log 10))
 (define coal-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 11))
+  (get-data total-less-popularity-ratio-data-points-log 11))
+
 
 
 (define carbon-energy-plot
   (plot (list
          (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
-         (lines (cdr biomass-energy-popularity-ratio-data)  #:color "darkgreen" #:style 'long-dash #:label (cadar biomass-energy-popularity-ratio-data))
          (lines (cdr total-fossil-fuels-popularity-ratio-data)  #:color "slategray" #:style 'dot-dash #:label (cadar total-fossil-fuels-popularity-ratio-data))
          (lines (cdr petroleum-to-crude-oil-popularity-ratio-data)  #:color "black" #:style 'short-dash #:label (cadar petroleum-to-crude-oil-popularity-ratio-data))
          (lines (cdr combined-natural-gas-popularity-ratio-data) #:color "blue" #:style 'long-dash  #:label (cadar combined-natural-gas-popularity-ratio-data))
@@ -343,26 +397,27 @@
         #:x-min 0
         #:x-max 420
         #:y-min -0.5
-        #:y-max 6
+        #:y-max 1.0
         #:width 1000
         #:height 1000))
 
 (define renewable-energy-plot
   (plot (list
-         (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
-         (lines (cdr total-renewable-energy-popularity-ratio-data)  #:color "darkgreen" #:style 'dot-dash #:width 1.3 #:label (cadar total-renewable-energy-popularity-ratio-data))
+         ;(function (lambda (x) 1) #:color "purple" #:style 'dot #:width 0.75)
+         (lines (cdr total-renewable-energy-popularity-ratio-data)  #:color "purple" #:style 'dot-dash #:width 1.3 #:label (cadar total-renewable-energy-popularity-ratio-data))
+         (lines (cdr biomass-energy-popularity-ratio-data)  #:color "darkgreen" #:style 'long-dash #:label (cadar biomass-energy-popularity-ratio-data))
          (lines (cdr wind-energy-popularity-ratio-data)  #:color "slategray" #:style 'dot #:width 1.3 #:label (cadar wind-energy-popularity-ratio-data))
          (lines (cdr solar-energy-popularity-ratio-data)  #:color "darkorange" #:style 'long-dash #:width 1.3 #:label (cadar solar-energy-popularity-ratio-data))
          (lines (cdr geothermal-energy-popularity-ratio-data)  #:color "brown" #:style 'short-dash #:width 1.3 #:label (cadar geothermal-energy-popularity-ratio-data))
          (lines (cdr hydroelectric-power-popularity-ratio-data)  #:color "darkblue" #:style 'dot #:width 1.3 #:label (cadar hydroelectric-power-popularity-ratio-data))
-         (lines (cdr nuclear-electric-power-popularity-ratio-data)  #:color "red" #:style 'solid #:width 1.3 #:label (cadar nuclear-electric-power-popularity-ratio-data)))
+         (lines (cdr nuclear-electric-power-popularity-ratio-data)  #:color "red" #:style 'dot #:width 1.3 #:label (cadar nuclear-electric-power-popularity-ratio-data)))
         #:title "Popularity Ratios over Time for Non-Carbon Based Sources of Energy"
         #:x-label "Time (Months from January 1984 to August 2018)"
-        #:y-label "Ratio (log base 10)"
+        #:y-label "Ratio"
         #:x-min 0
         #:x-max 420
-        #:y-min -4
-        #:y-max 2.25
+        #:y-min 0.9
+        #:y-max 1.05
         #:width 1000
         #:height 1000))
 
@@ -376,6 +431,21 @@
         #:x-min 0
         #:x-max 420
         #:y-min 0.7
-        #:y-max 1.5
+        #:y-max 2.0
         #:width 1000
         #:height 1000))
+
+(define compare-totals-plot
+  (plot (list
+         (lines (cdr total-fossil-fuels-popularity-ratio-data)  #:color "red" #:style 'dot-dash #:label (cadar total-fossil-fuels-popularity-ratio-data))
+         (lines (cdr total-renewable-energy-popularity-ratio-data-log)  #:color "purple" #:style 'dot-dash #:width 1.3 #:label (cadar total-renewable-energy-popularity-ratio-data)))
+        #:title "Total Fossil-Fuel Popularity vs Total Renewable Popularity"
+        #:x-label "Time (Months from January 1984 to August 2018)"
+        #:y-label "Ratio"
+        #:x-min 0
+        #:x-max 420
+        #:y-min -0.2
+        #:y-max 0.5
+        #:width 1000
+        #:height 1000))
+         
