@@ -12,15 +12,19 @@
 ;;; Procedure:
 ;;;   reformat-energy-data
 ;;; Parameters:
-;;;   table, a table in
+;;;   table, a table
 ;;; Purpose:
-;;;
+;;;   to reformat the energy data csv into a format friendly to data-analysis
 ;;; Produces:
-;;;
+;;;   reformatted-table, a table
 ;;; Preconditions:
-;;;
+;;;   table must follow the format of a US annual energy review primary energy overview
+;;;   or primary energy production by source file being read by csc151's read-csv-file function
 ;;; Postconditions:
-;;;
+;;;   reformatted-table will be a list of lists with the first list being a header listing all of
+;;;   the different types of datapoints available in the table, followed by individual lists of a
+;;;   given year-month combination's values for all points listed in the header. These year-month
+;;;   combinations will increase in chronological order and cover all dates available in the data.
 (define reformat-energy-data
   (lambda (table)
     (let* ([my-> (lambda (lst1 lst2)
@@ -56,15 +60,16 @@
 ;;; Procedure:
 ;;;   clean-reformatted-energy-data
 ;;; Parameters:
-;;;
+;;;   reformatted-data, a table
 ;;; Purpose:
-;;;
+;;;   to remove unwanted data from a reformatted US energy dataset
 ;;; Produces:
-;;;
+;;;   cleaned-reformatted-data, a table
 ;;; Preconditions:
-;;;
+;;;   reformatted-data must be an output of the procedure "reformat-energy-data"
 ;;; Postconditions:
-;;;
+;;;   cleaned-reformatted-data will be identical to reformatted-data but with all
+;;;   rows containing non-number and less than or equal to 0 data removed besides the header.
 (define clean-reformatted-energy-data
   (lambda (table)
     (let kernel ([clean-tbl null]
@@ -99,7 +104,7 @@
 ;;; Procedure:
 ;;;    consolidate-gas-production
 ;;; Parameters:
-;;;
+;;;    production-table, a table
 ;;; Purpose:
 ;;;
 ;;; Produces:
@@ -148,15 +153,23 @@
 ;;; Procedure:
 ;;;   create-popularity-ratio-table
 ;;; Parameters:
-;;;
+;;;   consumption-table, a table
+;;;   production-table, a table
 ;;; Purpose:
-;;;
+;;;   to generate popularity (consumption/production) data for analysis
 ;;; Produces:
-;;;
+;;;   popularity-table, a table
 ;;; Preconditions:
-;;;
+;;;   both production-table and consumption-table must have been run through the
+;;;   clean-reformatted-energy-data procedure.
 ;;; Postconditions:
-;;;
+;;;   popularity-table will have as it's first element, an identical header to production-table
+;;;   but with the string " ratio" after all but the first two elements.
+;;;   popularity-table will have all of the first and second elements of all lists in the table
+;;;   identical to production-table.
+;;;   popularity table will have, for all elements not previously specified, the result of division
+;;;   with the equivalent value from consumption-table as the numerator and the equivalent value
+;;;   from production-table as the denominator in place of the value.
 (define create-popularity-ratio-table
   (lambda (consumption-table production-table)
     (let ([round-to-sig-figs (lambda (num figs)
@@ -216,20 +229,20 @@
 ;;; Procedure:
 ;;;   remove-annual-totals
 ;;; Parameters:
-;;;
+;;;   popularity-table, a table
 ;;; Purpose:
-;;;
+;;;   to remove the values of the anual totals from a popularity table to make it more graphable
 ;;; Produces:
-;;;
+;;;   anual-total-less-popularity-table, a table
 ;;; Preconditions:
-;;;
+;;;   popularity-table must be the output from either the make-popularity-ratio-data-points-log
+;;;   or make-popularity-ratio-data-points procedures
 ;;; Postconditions:
-;;;
+;;;   anual-total-less-popularity-table will be identical to popularity-table but with all anual data
+;;;   (lists in the table that have a value of 13 as their month value) removed.
 (define remove-annual-totals
   (lambda (lst)
-    (if (= 13 (list-ref lst 1))
-        #f
-        #t)))
+    ((negate =) 13 (list-ref lst 1))))
 
 (define total-less-popularity-ratio-table
   (cons (car popularity-ratio-table) (filter (section remove-annual-totals <>) (cdr popularity-ratio-table))))
@@ -237,13 +250,14 @@
 
 
 ;;; Procedure:
-;;;   make-popularity-ratio-data-points
+;;;   make-popularity-ratio-data-points-log
 ;;; Parameters:
-;;;
+;;;   consumption-table, a table
+;;;   production-table, a table
 ;;; Purpose:
-;;;
+;;;   to generate logarithmic popularity (consumption/production) data for plotting
 ;;; Produces:
-;;;
+;;;   popularity-table, a table
 ;;; Preconditions:
 ;;;
 ;;; Postconditions:
@@ -448,4 +462,3 @@
         #:y-max 0.5
         #:width 1000
         #:height 1000))
-         
