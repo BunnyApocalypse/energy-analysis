@@ -52,10 +52,10 @@
                        (cons (caddar tbl-remaining) current-row)
                        (decrement counter))])))))
 
-(define reformatted-energy-production-data
-  (reformat-energy-data energy-production-data))
-(define reformatted-energy-consumption-data
-  (reformat-energy-data energy-consumption-data))
+;(define reformatted-energy-production-data
+;  (reformat-energy-data energy-production-data))
+;(define reformatted-energy-consumption-data
+;  (reformat-energy-data energy-consumption-data))
 
 ;;; Procedure:
 ;;;   clean-reformatted-energy-data
@@ -72,32 +72,37 @@
 ;;;   rows containing non-number and less than or equal to 0 data removed besides the header.
 (define clean-reformatted-energy-data
   (lambda (table)
-    (let kernel ([clean-tbl null]
-                 [tbl-remaining (reverse (cdr table))]
-                 [clean-lst null]
-                 [lst-remaining (reverse (car table))])
-      (cond  [(null? tbl-remaining)
-              (cons (car table) clean-tbl)]
-             [(null? lst-remaining)
-              (kernel (cons clean-lst clean-tbl)
-                      (cdr tbl-remaining)
-                      null
-                      (reverse (car tbl-remaining)))]
-             [(< 0 (or (string->number (car lst-remaining)) -1))
-              (kernel clean-tbl
-                      tbl-remaining
-                      (cons (string->number (car lst-remaining)) clean-lst)
-                      (cdr lst-remaining))]
-             [else
-              (kernel clean-tbl
-                      (cdr tbl-remaining)
-                      null
-                      (reverse (car tbl-remaining)))]))))
+    (let ([value-not-equal-13-not-negative-is-number? (lambda (element)
+                                                        (equal? true (when (string->number element)
+                                                                       (and (not (= 13 (string->number element)))
+                                                                            (< 0 (string->number element))
+                                                                            #t))))])
+      (let kernel ([clean-tbl null]
+                   [tbl-remaining (reverse (cdr table))]
+                   [clean-lst null]
+                   [lst-remaining (reverse (car table))])
+        (cond  [(null? tbl-remaining)
+                (cons (car table) clean-tbl)]
+               [(null? lst-remaining)
+                (kernel (cons clean-lst clean-tbl)
+                        (cdr tbl-remaining)
+                        null
+                        (reverse (car tbl-remaining)))]
+               [(value-not-equal-13-not-negative-is-number? (car lst-remaining))
+                (kernel clean-tbl
+                        tbl-remaining
+                        (cons (string->number (car lst-remaining)) clean-lst)
+                        (cdr lst-remaining))]
+               [else
+                (kernel clean-tbl
+                        (cdr tbl-remaining)
+                        null
+                        (reverse (car tbl-remaining)))])))))
 
-(define cleaned-reformatted-energy-production-data
-  (clean-reformatted-energy-data reformatted-energy-production-data))
-(define cleaned-reformatted-energy-consumption-data
-  (clean-reformatted-energy-data reformatted-energy-consumption-data))
+;(define cleaned-reformatted-energy-production-data
+;  (clean-reformatted-energy-data reformatted-energy-production-data))
+;(define cleaned-reformatted-energy-consumption-data
+;  (clean-reformatted-energy-data reformatted-energy-consumption-data))
 
 
 
@@ -225,15 +230,16 @@
 
 
 
-(define reformatted-production-data
-  (consolidate-gas-production
-  cleaned-reformatted-energy-production-data))
+(define usable-production-data
+  (consolidate-gas-production (clean-reformatted-energy-data (reformat-energy-data energy-production-data))))
+;  cleaned-reformatted-energy-production-data))
 
-(define reformatted-consumption-data
-  cleaned-reformatted-energy-consumption-data)
+(define usable-consumption-data
+  (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data)))
+; cleaned-reformatted-energy-consumption-data)
 
 (define popularity-ratio-table
-  (create-popularity-ratio-table reformatted-consumption-data reformatted-production-data))
+  (create-popularity-ratio-table usable-consumption-data usable-production-data))
 
 ;;; Procedure:
 ;;;   remove-annual-totals
@@ -249,12 +255,12 @@
 ;;; Postconditions:
 ;;;   anual-total-less-popularity-table will be identical to popularity-table but with all anual data
 ;;;   (lists in the table that have a value of 13 as their month value) removed.
-(define remove-annual-totals
-  (lambda (lst)
-    ((negate =) 13 (list-ref lst 1))))
+;(define remove-annual-totals
+;  (lambda (lst)
+;    ((negate =) 13 (list-ref lst 1))))
 
-(define total-less-popularity-ratio-table
-  (cons (car popularity-ratio-table) (filter (section remove-annual-totals <>) (cdr popularity-ratio-table))))
+;(define total-less-popularity-ratio-table
+;  (cons (car popularity-ratio-table) (filter (section remove-annual-totals <>) (cdr popularity-ratio-table))))
 
 
 
@@ -367,11 +373,11 @@
 
 
 
-(define total-less-popularity-ratio-data-points
-  (make-popularity-ratio-data-points total-less-popularity-ratio-table))
+(define popularity-ratio-data-points
+  (make-popularity-ratio-data-points popularity-ratio-table))
 
-(define total-less-popularity-ratio-data-points-log
-  (make-popularity-ratio-data-points-log total-less-popularity-ratio-table))
+(define popularity-ratio-data-points-log
+  (make-popularity-ratio-data-points-log popularity-ratio-table))
 
 
 (define get-data
@@ -379,31 +385,31 @@
     (map (section list-ref <> num) table)))
 
 (define total-primary-energy-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 0))
+  (get-data popularity-ratio-data-points 0))
 (define total-renewable-energy-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 1))
+  (get-data popularity-ratio-data-points 1))
 (define total-renewable-energy-popularity-ratio-data-log
-  (get-data total-less-popularity-ratio-data-points-log 1))
+  (get-data popularity-ratio-data-points-log 1))
 (define biomass-energy-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 2))
+  (get-data popularity-ratio-data-points 2))
 (define wind-energy-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 3))
+  (get-data popularity-ratio-data-points 3))
 (define solar-energy-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 4))
+  (get-data popularity-ratio-data-points 4))
 (define geothermal-energy-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 5))
+  (get-data popularity-ratio-data-points 5))
 (define hydroelectric-power-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 6))
+  (get-data popularity-ratio-data-points 6))
 (define nuclear-electric-power-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points 7))
+  (get-data popularity-ratio-data-points 7))
 (define total-fossil-fuels-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points-log 8))
+  (get-data popularity-ratio-data-points-log 8))
 (define petroleum-to-crude-oil-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points-log 9))
+  (get-data popularity-ratio-data-points-log 9))
 (define combined-natural-gas-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points-log 10))
+  (get-data popularity-ratio-data-points-log 10))
 (define coal-popularity-ratio-data
-  (get-data total-less-popularity-ratio-data-points-log 11))
+  (get-data popularity-ratio-data-points-log 11))
 
 
 
