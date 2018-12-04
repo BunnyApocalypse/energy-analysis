@@ -1,7 +1,13 @@
 #lang racket
+
 (require csc151)
 (require plot)
 
+;;; Here, we read our csv files containing our data, downloaded from the eia:
+;;;    https://www.eia.gov/totalenergy/data/annual/
+;;;    In "Annual Energy Review", under "Energy Overview", sections 1.2 and 1.3,
+;;;    you will find the following datasets: Primary energy production by source
+;;;                                          Primary energy consumption by source
 
 (define energy-production-data
   (read-csv-file "MER_T01_02.csv"))
@@ -9,6 +15,7 @@
 (define energy-consumption-data
   (read-csv-file "MER_T01_03.csv"))
 
+;=======================================================================================================================
 ;;; Procedure:
 ;;;   reformat-energy-data
 ;;; Parameters:
@@ -57,6 +64,7 @@
 ;(define reformatted-energy-consumption-data
 ;  (reformat-energy-data energy-consumption-data))
 
+;=======================================================================================================================
 ;;; Procedure:
 ;;;   clean-reformatted-energy-data
 ;;; Parameters:
@@ -104,8 +112,7 @@
 ;(define cleaned-reformatted-energy-consumption-data
 ;  (clean-reformatted-energy-data reformatted-energy-consumption-data))
 
-
-
+;=======================================================================================================================
 ;;; Procedure:
 ;;;    consolidate-gas-production
 ;;; Parameters:
@@ -164,6 +171,7 @@
                        (cdr current-list)
                        (increment counter))])))))
 
+;=======================================================================================================================
 ;;; Procedure:
 ;;;   create-popularity-ratio-table
 ;;; Parameters:
@@ -177,7 +185,7 @@
 ;;;   both production-table and consumption-table must have been run through the
 ;;;   clean-reformatted-energy-data procedure.
 ;;; Postconditions:
-;;;   popularity-table will have as it's first element, an identical header to production-table
+;;;   popularity-table will have as its first element, an identical header to production-table
 ;;;   but with the string " ratio" after all but the first two elements.
 ;;;   popularity-table will have all of the first and second elements of all lists in the table
 ;;;   identical to production-table.
@@ -228,55 +236,36 @@
                                                    (car production-working-row)) 6)
                              new-row))])))))
 
-
-
+;;; Here we define our cleaned and nicely formatted data 
 (define usable-production-data
   (consolidate-gas-production (clean-reformatted-energy-data (reformat-energy-data energy-production-data))))
-;  cleaned-reformatted-energy-production-data))
 
 (define usable-consumption-data
   (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data)))
-; cleaned-reformatted-energy-consumption-data)
 
+;;; Here we can finally create our table that dictates the popularity for each energy source
 (define popularity-ratio-table
   (create-popularity-ratio-table usable-consumption-data usable-production-data))
 
-;;; Procedure:
-;;;   remove-annual-totals
-;;; Parameters:
-;;;   popularity-table, a table
-;;; Purpose:
-;;;   to remove the values of the anual totals from a popularity table to make it more graphable
-;;; Produces:
-;;;   anual-total-less-popularity-table, a table
-;;; Preconditions:
-;;;   popularity-table must be the output from either the make-popularity-ratio-data-points-log
-;;;   or make-popularity-ratio-data-points procedures
-;;; Postconditions:
-;;;   anual-total-less-popularity-table will be identical to popularity-table but with all anual data
-;;;   (lists in the table that have a value of 13 as their month value) removed.
-;(define remove-annual-totals
-;  (lambda (lst)
-;    ((negate =) 13 (list-ref lst 1))))
-
-;(define total-less-popularity-ratio-table
-;  (cons (car popularity-ratio-table) (filter (section remove-annual-totals <>) (cdr popularity-ratio-table))))
-
-
-
+;=======================================================================================================================
 ;;; Procedure:
 ;;;   make-popularity-ratio-data-points-log
 ;;; Parameters:
-;;;   consumption-table, a table
-;;;   production-table, a table
+;;;   consumption-table-log, a table
+;;;   production-table-log, a table
 ;;; Purpose:
 ;;;   to generate logarithmic popularity (consumption/production) data for plotting
 ;;; Produces:
-;;;   popularity-table, a table
+;;;   popularity-ratio-data-points-log, a table
 ;;; Preconditions:
-;;;
+;;;   table must be in the same format as popularity-ratio-table
 ;;; Postconditions:
-;;;
+;;;   popularity-ratio-data-points-log will be a list of lists containing information about the popularity ratio
+;;;   for each energy source. For each list in popularity-ratio-data-points-log, the first element will denote the month
+;;;   since January 1984. The second value for each list in popularity-ratio-data-points-log will denote the respective
+;;;   popularity ratio. This second value will be represented under log 10, that is to say, for each value n that
+;;;   represents the popularity ratio in popularity-ratio-table, we will perform log(n)/log(10). This is to
+;;;   shrink our values onto a smaller scale. 
 (define make-popularity-ratio-data-points-log
   (lambda (table)
     (let* ([time-scale-metric (lambda (table)
@@ -318,18 +307,23 @@
                        current-time-value
                        time-values-remaining)])))))
 
+;=======================================================================================================================
 ;;; Procedure:
 ;;;   make-popularity-ratio-data-points
-;;; Parameters:
-;;;
+;;; Parameters
+;;;   consumption-table, a table
+;;;   production-table, a table
 ;;; Purpose:
-;;;
+;;;   to generate logarithmic popularity (consumption/production) data for plotting
 ;;; Produces:
-;;;
+;;;   popularity-ratio-data-points-table, a table
 ;;; Preconditions:
-;;;
+;;;   table must be in the same format as popularity-ratio-table
 ;;; Postconditions:
-;;;
+;;;   popularity-ratio-data-points-table will be a list of lists containing information about the popularity ratio
+;;;   for each energy source. For each list in popularity-ratio-data-points-table, the first element will denote the month
+;;;   since January 1984. The second value for each list in popularity-ratio-data-points will denote the respective
+;;;   popularity ratio.
 (define make-popularity-ratio-data-points
   (lambda (table)
     (let* ([time-scale-metric (lambda (table)
@@ -371,15 +365,14 @@
                        current-time-value
                        time-values-remaining)])))))
 
-
-
+;=======================================================================================================================
 (define popularity-ratio-data-points
   (make-popularity-ratio-data-points popularity-ratio-table))
 
 (define popularity-ratio-data-points-log
   (make-popularity-ratio-data-points-log popularity-ratio-table))
 
-
+;=======================================================================================================================
 (define get-data
   (lambda (table num)
     (map (section list-ref <> num) table)))
@@ -411,8 +404,7 @@
 (define coal-popularity-ratio-data
   (get-data popularity-ratio-data-points-log 11))
 
-
-
+;=======================================================================================================================
 (define carbon-energy-plot
   (plot (list
          (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
@@ -477,3 +469,4 @@
         #:y-max 0.5
         #:width 1000
         #:height 1000))
+;=======================================================================================================================
