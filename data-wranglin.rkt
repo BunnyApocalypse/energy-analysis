@@ -106,13 +106,22 @@
 ;;; Parameters:
 ;;;    production-table, a table
 ;;; Purpose:
-;;;
+;;;    to combine the dry and liquid natural gas statistics from a table to make it match a
+;;;    consumption dataset for statistical analysis
 ;;; Produces:
-;;;
+;;;    consolidated-table, a table
 ;;; Preconditions:
-;;;
+;;;    production-table must be a production table that has been put through the
+;;;    "clean-reformatted-energy-data" procedure
 ;;; Postconditions:
-;;;
+;;;    the first list of consolidated-table will be identical to the first element of
+;;;    production-table, but with the 11th element (starting from an index of 0) removed and the 13th
+;;;    element replaced with the value "Combined (Dry & Liquid) Natural Gas Production"
+;;;    the rest of consolidated-table will be identical to the equivalent elements of production table
+;;;    but with the 11th element removed, and the 13th element being replaced with the result of
+;;;    addition of the 13th and 11th elements.
+;;;    due to the 11th element being removed from all elements of the list, the respective "13th"
+;;;    elements will now occupy an index of 12.
 (define consolidate-gas-production
   (lambda (production-table)
     (let ([my-production-table (reverse (cons (list 1) (cdr production-table)))])
