@@ -1,21 +1,36 @@
 #lang racket
+
 (require csc151)
 (require plot)
+<<<<<<< HEAD
 ;------------------------------------------------------------------------------------------------------
 ;------------------------------------------------------------------------------------------------------
 ;0;RAW DATA
 ;-----------------------------------------------
+=======
+
+;;; Here, we read our csv files containing our data, downloaded from the eia:
+;;;    https://www.eia.gov/totalenergy/data/annual/
+;;;    In "Annual Energy Review", under "Energy Overview", sections 1.2 and 1.3,
+;;;    you will find the following datasets: Primary energy production by source
+;;;                                          Primary energy consumption by source
+
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 (define energy-production-data
   (read-csv-file "MER_T01_02.csv"))
 
 (define energy-consumption-data
   (read-csv-file "MER_T01_03.csv"))
 
+<<<<<<< HEAD
 
 ;------------------------------------------------------------------------------------------------------
 ;------------------------------------------------------------------------------------------------------
 ;1;REFORMAT  
 ;-----------------------------------------------
+=======
+;=======================================================================================================================
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;; Procedure:
 ;;;   reformat-energy-data
 ;;; Parameters:
@@ -93,11 +108,15 @@
 ;(define reformatted-energy-consumption-data
 ;  (reformat-energy-data energy-consumption-data))
 
+<<<<<<< HEAD
 
 ;------------------------------------------------------------------------------------------------------
 ;------------------------------------------------------------------------------------------------------
 ;2;CLEAN 
 ;-----------------------------------------------
+=======
+;=======================================================================================================================
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;; Procedure:
 ;;;   clean-reformatted-energy-data
 ;;; Parameters:
@@ -157,6 +176,7 @@
 ;(define cleaned-reformatted-energy-consumption-data
 ;  (clean-reformatted-energy-data reformatted-energy-consumption-data))
 
+<<<<<<< HEAD
 
 
 ;------------------------------------------------------------------------------------------------------
@@ -164,6 +184,9 @@
 ;3;CONSOLIDATE
 ;-----------------------------------------------
 
+=======
+;=======================================================================================================================
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;; Procedure:
 ;;;    consolidate-production-hydrocarbons
 ;;; Parameters:
@@ -214,6 +237,7 @@
                        (cdr current-row)
                        (increment current-column))])))))
 
+;=======================================================================================================================
 ;;; Procedure:
 ;;;    consolidate-consumption-hydrocarbons
 ;;; Parameters:
@@ -288,7 +312,11 @@
 ;;;       clean-reformatted-energy-data procedure.
 ;;; Postconditions:
 ;;;   popularity-table will have as its first element, an identical header to production-table
+<<<<<<< HEAD
 ;;;       but with the string " ratio" after all but the first two elements.
+=======
+;;;   but with the string " ratio" after all but the first two elements.
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;;   popularity-table will have all of the first and second elements of all lists in the table
 ;;;       identical to production-table.
 ;;;   popularity table will have, for all elements not previously specified, the result of division
@@ -337,6 +365,7 @@
                                                    (car production-working-row)) 6)
                              new-row))])))))
 
+<<<<<<< HEAD
 
 
 
@@ -347,10 +376,20 @@
 (define usable-consumption-data
   (consolidate-consumption-hydrocarbons (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data))))
 ; cleaned-reformatted-energy-consumption-data)
+=======
+;;; Here we define our cleaned and nicely formatted data 
+(define usable-production-data
+  (consolidate-gas-production (clean-reformatted-energy-data (reformat-energy-data energy-production-data))))
 
+(define usable-consumption-data
+  (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data)))
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
+
+;;; Here we can finally create our table that dictates the popularity for each energy source
 (define popularity-ratio-table
   (create-popularity-ratio-table usable-consumption-data usable-production-data))
 
+<<<<<<< HEAD
 ;------------------------------------------------------------------------------------------------------
 ;------------------------------------------------------------------------------------------------------
 ;5;MAKE PLOT-ABLE 
@@ -382,13 +421,22 @@
                 (cadar table-remaining)
                 (caar table-remaining))])))))
 
+=======
+;=======================================================================================================================
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;; Procedure:
 ;;;   make-logarithmic-data-points
 ;;; Parameters:
+<<<<<<< HEAD
 ;;;   table, a table
+=======
+;;;   consumption-table-log, a table
+;;;   production-table-log, a table
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;; Purpose:
 ;;;   to generate logarithmically scaled plotting data for popularity table
 ;;; Produces:
+<<<<<<< HEAD
 ;;;   logarithmic-data-table, a plottable data table
 ;;; Preconditions:
 ;;;    table must have at least three columns.
@@ -400,6 +448,19 @@
 ;;;        The numbers in each data point are provided by running the make-time-scale-metric procedure
 ;;;        on table. No other changes are made to the structure of the data.
 (define make-logarithmic-data-points
+=======
+;;;   popularity-ratio-data-points-log, a table
+;;; Preconditions:
+;;;   table must be in the same format as popularity-ratio-table
+;;; Postconditions:
+;;;   popularity-ratio-data-points-log will be a list of lists containing information about the popularity ratio
+;;;   for each energy source. For each list in popularity-ratio-data-points-log, the first element will denote the month
+;;;   since January 1984. The second value for each list in popularity-ratio-data-points-log will denote the respective
+;;;   popularity ratio. This second value will be represented under log 10, that is to say, for each value n that
+;;;   represents the popularity ratio in popularity-ratio-table, we will perform log(n)/log(10). This is to
+;;;   shrink our values onto a smaller scale. 
+(define make-popularity-ratio-data-points-log
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
   (lambda (table)
     (let* ([time-values (reverse (cons 0 (make-time-scale-metric table)))]
            [working-table (reverse (cons (make-list 11 0) (map cddr (cdr table))))]
@@ -427,7 +488,9 @@
                        current-time-value
                        time-values-remaining)])))))
 
+;=======================================================================================================================
 ;;; Procedure:
+<<<<<<< HEAD
 ;;;   make-linear-data-points
 ;;; Parameters:
 ;;  table, a table
@@ -444,15 +507,29 @@
 ;;;        replaces that entry with a data point, which is a list consisting of a number and each entry. T
 ;;;        The numbers in each data point are provided by running the make-time-scale-metric procedure
 ;;;        on table. No other changes are made to the structure of the data.
+=======
+;;;   make-popularity-ratio-data-points
+;;; Parameters
+;;;   consumption-table, a table
+;;;   production-table, a table
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 ;;; Purpose:
-;;;
+;;;   to generate logarithmic popularity (consumption/production) data for plotting
 ;;; Produces:
-;;;
+;;;   popularity-ratio-data-points-table, a table
 ;;; Preconditions:
-;;;
+;;;   table must be in the same format as popularity-ratio-table
 ;;; Postconditions:
+<<<<<<< HEAD
 ;;;
 (define make-linear-data-points
+=======
+;;;   popularity-ratio-data-points-table will be a list of lists containing information about the popularity ratio
+;;;   for each energy source. For each list in popularity-ratio-data-points-table, the first element will denote the month
+;;;   since January 1984. The second value for each list in popularity-ratio-data-points will denote the respective
+;;;   popularity ratio.
+(define make-popularity-ratio-data-points
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
   (lambda (table)
     (let* ([time-values (reverse (cons 0 (make-time-scale-metric table)))]
            [working-table (reverse (cons (make-list 11 0) (map cddr (cdr table))))]
@@ -480,14 +557,21 @@
                        current-time-value
                        time-values-remaining)])))))
 
+<<<<<<< HEAD
 
 
 (define linear-popularity-ratio-data-points
   (make-linear-data-points popularity-ratio-table))
+=======
+;=======================================================================================================================
+(define popularity-ratio-data-points
+  (make-popularity-ratio-data-points popularity-ratio-table))
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 
 (define logarithmic-popularity-ratio-data-points
   (make-logarithmic-data-points popularity-ratio-table))
 
+<<<<<<< HEAD
 
 ;;; Procedure:
 ;;;   get-data
@@ -505,6 +589,9 @@
 ;;;    (get-data table num) = (map (section list-ref <> num) table)
 ;;;     We know this is literally just the procedure but there is no better way to describe it.
 ;;;
+=======
+;=======================================================================================================================
+>>>>>>> 8ca18298865ba65be17c84215b9b5f26fc4ae6d1
 (define get-data
   (lambda (table num)
     (map (section list-ref <> num) table)))
@@ -536,8 +623,7 @@
 (define coal-popularity-ratio-data
   (get-data logarithmic-popularity-ratio-data-points 10))
 
-
-
+;=======================================================================================================================
 (define carbon-energy-plot
   (plot (list
          (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
@@ -581,7 +667,7 @@
          (lines (cdr total-primary-energy-popularity-ratio-data) #:color 0 #:style 'solid #:label (cadar total-primary-energy-popularity-ratio-data)))
         #:title "Popularity Ratio over Time for Total Primary Energy"
         #:x-label "Time (Months from January 1984 to August 2018)"
-        #:y-label "Ratio (log base 10)"
+        #:y-label "Ratio"
         #:x-min 0
         #:x-max 420
         #:y-min 0.7
@@ -602,3 +688,4 @@
         #:y-max 0.5
         #:width 1000
         #:height 1000))
+;=======================================================================================================================
