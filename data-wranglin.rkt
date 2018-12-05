@@ -19,7 +19,7 @@
 
 
 ;=======================================================================================================================
-;1;REFORMAT  
+;1;REFORMAT
 ;==============================
 ;;; Procedure:
 ;;;   reformat-energy-data
@@ -47,10 +47,10 @@
 ;;;         of the different types of datapoints available in the table, followed by individual
 ;;;         lists of given year-month combination's values for all points listed in the header.
 ;;;         These year-month combinations will increase in chronological order and cover all
-;;;         dates available in the data. 
+;;;         dates available in the data.
 ;;;   The number of columns in reformatted-table is 2 more than the maximum value of "Column_Order"
 ;;;         in table.
-;;;   
+;;;
 (define reformat-energy-data
   (lambda (table)
     (let* (;This predicate determines if a "MMMMYY" in table is at a later date than some other "MMMMYY"
@@ -88,7 +88,7 @@
                 starting-column)]
               [else
                (kernel reformatted-table
-                       ;we add the "Value" entry to new-row and then recurse onto the next row in table. 
+                       ;we add the "Value" entry to new-row and then recurse onto the next row in table.
                        (cdr table-remaining)
                        (cons (caddar table-remaining) new-row)
                        (decrement current-column))])))))
@@ -100,7 +100,7 @@
 
 
 ;=======================================================================================================================
-;2;CLEAN 
+;2;CLEAN
 ;==============================
 ;;; Procedure:
 ;;;   clean-reformatted-energy-data
@@ -155,13 +155,6 @@
                         null
                         (reverse (car table-remaining))
                         (- current-column 1))])))))
-
-;(define cleaned-reformatted-energy-production-data
-; (clean-reformatted-energy-data reformatted-energy-production-data))
-;(define cleaned-reformatted-energy-consumption-data
-;  (clean-reformatted-energy-data reformatted-energy-consumption-data))
-
-
 
 ;=======================================================================================================================
 ;3;CONSOLIDATE
@@ -344,17 +337,15 @@
 
 (define usable-production-data
   (consolidate-production-hydrocarbons (clean-reformatted-energy-data (reformat-energy-data energy-production-data))))
-;  cleaned-reformatted-energy-production-data))
 
 (define usable-consumption-data
   (consolidate-consumption-hydrocarbons (clean-reformatted-energy-data (reformat-energy-data energy-consumption-data))))
-; cleaned-reformatted-energy-consumption-data)
 
 (define popularity-ratio-table
   (create-popularity-ratio-table usable-consumption-data usable-production-data))
 
 ;=======================================================================================================================
-;5;MAKE PLOT-ABLE 
+;5;MAKE PLOT-ABLE
 ;==============================
 
 ;;; Procedure:
@@ -523,16 +514,12 @@
   (get-data logarithmic-popularity-ratio-data-points 8))
 (define hydrocarbon-popularity-ratio-data
   (get-data logarithmic-popularity-ratio-data-points 9))
-;(define combined-natural-gas-popularity-ratio-data
-; (get-data linear-popularity-ratio-data-points-log 10))
 (define coal-popularity-ratio-data
   (get-data logarithmic-popularity-ratio-data-points 10))
-
 
 ;=======================================================================================================================
 ;6;PLOT
 ;==============================
-
 (define carbon-energy-plot
   (plot (list
          (function (lambda (x) 0) #:color "purple" #:style 'dot #:width 0.75)
@@ -597,5 +584,4 @@
         #:y-max 0.5
         #:width 1000
         #:height 1000))
-
 ;===================================================================================================================
