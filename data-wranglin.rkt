@@ -448,7 +448,7 @@
          (lines (cdr total-primary-energy-popularity-ratio-data) #:color 0 #:style 'solid #:label (cadar total-primary-energy-popularity-ratio-data)))
         #:title "Popularity Ratio over Time for Total Primary Energy"
         #:x-label "Time (Months from January 1984 to August 2018)"
-        #:y-label "Ratio (log base 10)"
+        #:y-label "Ratio"
         #:x-min 0
         #:x-max 420
         #:y-min 0.7
