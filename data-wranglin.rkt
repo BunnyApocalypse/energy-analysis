@@ -595,7 +595,7 @@
          (lines (cdr total-renewable-energy-logarithmic-popularity-ratio-data)  #:color "purple" #:style 'dot-dash #:width 1.3 #:label (cadar total-renewable-energy-popularity-ratio-data)))
         #:title "Total Fossil-Fuel Popularity vs Total Renewable Popularity"
         #:x-label "Time (Months from January 1984 to August 2018)"
-        #:y-label "Ratio"
+        #:y-label "Ratio (log base 10)"
         #:x-min 0
         #:x-max 420
         #:y-min -0.2
